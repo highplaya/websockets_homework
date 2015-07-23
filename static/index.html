@@ -1,0 +1,78 @@
+<html>
+	<head>
+	</head>
+
+	<body>
+		<div>
+			<input type="text" placeholder="Your name" id="nameInput">
+			<input type="button" value="OK" id="nameButton">	
+		</div>
+		<div>
+			<input type="text" placeholder="room name" id="roomName">
+			<input type="button" value="OK" id="roomButton">	
+		</div>
+		<ul id="messages"></ul>
+		<div>
+			<input type="text" rows="30" cols="30" placeholder="Your message" id="text">
+			<input type="button" value="OK" id="textSubmit">	
+		</div>
+	</body>
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+	<script type="text/javascript">
+	(function(){
+		var nameButton = $('#nameButton');
+		var nameInput = $('#nameInput');
+		var roomName = $('#roomName');
+		var roomButton = $('#roomButton');
+		var messages = $('#messages');
+		var text = $('#text');
+		var textSubmit = $('#textSubmit');
+
+		var userName = 'User1';
+		var room = 'Common';
+		var socket = io.connect();
+
+		nameButton.click(function(){
+			userName = nameInput.val() || 'User1';
+		});
+
+		roomButton.click(function(){
+			socket.emit('join room', roomName.val());
+		})
+
+		textSubmit.click(function(){
+			var data = {
+				name: userName,
+				text: text.val()
+			};
+
+			text.val('');
+			socket.emit('room message', data);
+		});
+
+		socket.on('room history', function(msg){
+			messages.val('');
+			for(var i in msg){
+				if(msg.hasOwnProperty(i)){
+					messages.append($('<li>').text(msg[i].name + ': ' + msg[i].text));
+				}
+			}
+		});
+
+		socket.on('chat message', function(msg){
+			console.log(msg);
+		});
+
+		socket.on('room message', function(msg){
+			console.log(msg);
+			messages.append($('<li>').text(msg.name + ': ' + msg.text));
+		});
+
+	})();
+	</script>
+
+
+
+
+</html>
